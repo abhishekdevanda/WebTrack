@@ -1,0 +1,20 @@
+import { Header } from "@/components/layout/header";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Dashboard - WebTrack",
+    description: "Analytics for the websites.",
+};
+
+export default function DashboardLayout({
+    children,
+}: Readonly<{ children: React.ReactNode }>) {
+    return (
+        <>
+            <Header />
+            <main>
+                {children}
+            </main>
+        </>
+    );
+}

@@ -8,7 +8,7 @@ export async function signInWithGoogle() {
   const result = await auth.api.signInSocial({
     body: {
       provider: "google",
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     },
     headers: await headers(),
   });
