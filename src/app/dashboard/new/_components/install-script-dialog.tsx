@@ -40,7 +40,7 @@ export const InstallScriptDialog = () => {
     const scriptCode = `<script
   defer
   data-website-id="${websiteId}"
-  src="${process.env.NEXT_PUBLIC_BASE_URL}/script.js"
+  src="${process.env.NEXT_PUBLIC_BASE_URL}/analytics.js"
 ></script>`;
 
     const copyToClipboard = async () => {
@@ -106,7 +106,7 @@ export const InstallScriptDialog = () => {
                         type="button"
                         onClick={() => handleOpenChange(false)}
                     >
-                        Done, I've installed it
+                        Done, I&apos;ve installed it
                     </Button>
                 </DialogFooter>
             </DialogContent>

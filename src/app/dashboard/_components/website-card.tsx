@@ -4,12 +4,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Settings, TrendingUp, BarChart2 } from "lucide-react";
 import Link from "next/link";
-import { website } from "@/db/schema";
-import { InferSelectModel } from "drizzle-orm";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-
-type Website = InferSelectModel<typeof website>;
+import { Website } from "@/db/schema";
+import { Area, AreaChart } from "recharts";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 interface WebsitesCardProps {
     website: Website;

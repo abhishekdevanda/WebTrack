@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { InferSelectModel } from "drizzle-orm";
+import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -75,3 +76,36 @@ export const website = pgTable("website", {
         .$onUpdate(() => new Date())
         .notNull(),
 });
+
+export const pageView = pgTable("page_view", {
+    id: text("id").primaryKey(),
+    websiteId: text("website_id")
+        .notNull()
+        .references(() => website.websiteId, { onDelete: "cascade" }),
+    visitorId: text("visitor_id").notNull(),
+
+    entryTime: timestamp("entry_time"),
+    exitTime: timestamp("exit_time"),
+    totalActiveTime: integer("total_active_time").default(0),
+
+    referrer: text("referrer"),
+    url: text("url"),
+
+    utmSource: text("utm_source"),
+    utmMedium: text("utm_medium"),
+    utmCampaign: text("utm_campaign"),
+    refParams: text("ref_params"),
+
+    device: text("device"),
+    os: text("os"),
+    browser: text("browser"),
+    city: text("city"),
+    country: text("country"),
+    region : text("region"),
+    ipAddress: text("ip_address"),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Website = InferSelectModel<typeof website>;
+export type PageView = InferSelectModel<typeof pageView>;

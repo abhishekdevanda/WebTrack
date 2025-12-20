@@ -12,7 +12,7 @@ export const NoWebsites = () => {
                 </EmptyMedia>
                 <EmptyTitle>No websites tracked</EmptyTitle>
                 <EmptyDescription>
-                    You haven't added any websites to track yet.
+                    You haven&apos;t added any websites to track yet.
                     Start by adding your first website.
                 </EmptyDescription>
             </EmptyHeader>

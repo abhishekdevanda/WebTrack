@@ -5,15 +5,22 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1766180110415,
-      "tag": "0000_salty_silver_surfer",
+      "when": 1766243901565,
+      "tag": "0000_previous_celestials",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1766180118808,
-      "tag": "0001_slow_hedge_knight",
+      "when": 1766243933055,
+      "tag": "0001_secret_cable",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766243964603,
+      "tag": "0002_eager_quasimodo",
       "breakpoints": true
     }
   ]

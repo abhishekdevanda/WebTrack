@@ -74,7 +74,7 @@ export async function addWebsite(prevState: State, formData: FormData): Promise<
             id: crypto.randomUUID(),
             websiteId,
             name,
-            url,
+            url: validatedUrl,
             timezone,
             userId: isAuthenticated.user.id,
         });
@@ -85,5 +85,5 @@ export async function addWebsite(prevState: State, formData: FormData): Promise<
         };
     }
 
-    redirect(`/dashboard/new?websiteId=${websiteId}&url=${validatedUrl}`);
+    redirect(`/dashboard/new?websiteId=${websiteId}`);
 }

@@ -1,11 +1,9 @@
 "use server";
 
 import { website } from "@/db/schema";
-import { auth } from "@/lib/configs/auth-config";
 import { db } from "@/lib/configs/drizzle-config";
 import { getSession } from "@/lib/isAuthenticated";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 
 export async function getWebsitesList() {
 
@@ -29,6 +27,7 @@ export async function getWebsitesList() {
         };
 
     } catch (error) {
+        console.error("Error Fetching Websites:", error);
         return {
             message: "Failed to Fetch Websites.",
         };
