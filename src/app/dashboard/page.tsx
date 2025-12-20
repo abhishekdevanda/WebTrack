@@ -4,6 +4,8 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WebsitesList } from "./_components/websites-list";
 import { getSession} from "@/lib/isAuthenticated";
+import { Suspense } from "react";
+import { WebsitesSkeleton } from "./_components/websites-skeleton";
 
 export default async function Dashboard() {
     const isAuthenticated = await getSession();
@@ -23,7 +25,9 @@ export default async function Dashboard() {
                 </Link>
             </div>
 
-            <WebsitesList />
+            <Suspense fallback={<WebsitesSkeleton />}>
+                <WebsitesList />
+            </Suspense>
         </div>
     )
 }
