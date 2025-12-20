@@ -1,14 +1,11 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/configs/auth-config";
 import { LoginForm } from "./_components/login-form";
+import { getSession } from "@/lib/isAuthenticated";
 
 export default async function LoginPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (session) {
-    redirect("/");
+  const isAuthenticated = await getSession();
+  if (isAuthenticated) {
+    redirect("/dashboard");
   }
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

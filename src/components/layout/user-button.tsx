@@ -12,27 +12,20 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface UserButtonProps {
     user: {
         name: string;
         email: string;
         image?: string | null;
-    } | null;
+    }
 }
 
 export const UserButton = ({ user }: UserButtonProps) => {
-    const router = useRouter();
-
-    if (!user) {
-        return (
-            <Button onClick={() => router.push("/login")}>
-                Sign In
-            </Button>
-        )
+    const handleLogout = async () => {
+        await signOut();
     }
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -62,14 +55,11 @@ export const UserButton = ({ user }: UserButtonProps) => {
                     <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={async () => {
-                    await signOut();
-                    router.push("/login");
-                }}>
+                <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu >
     );
 };

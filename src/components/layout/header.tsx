@@ -1,15 +1,16 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/configs/auth-config";
 import { ThemeToggle } from "./theme-toggle";
 import { UserButton } from "./user-button";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/isAuthenticated";
 
 export const Header = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const isAuthenticated = await getSession();
+    if (!isAuthenticated) {
+        redirect("/login");
+    }
 
     return (
-        <header className="w-full p-4">
+        <header className="max-w-7xl mx-auto p-4">
             <div className="flex items-center justify-between">
                 <div className="flex gap-2 items-center">
                     {/* TODO: Add logo here */}
@@ -17,7 +18,7 @@ export const Header = async () => {
                 </div>
                 <div className="flex gap-4 items-center">
                     <ThemeToggle />
-                    <UserButton user={session?.user || null} />
+                    <UserButton user={isAuthenticated.user} />
                 </div>
             </div>
         </header>

@@ -1,29 +1,27 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WebsitesList } from "./_components/websites-list";
-import { getSession} from "@/lib/isAuthenticated";
+import { WebsiteForm } from "./_components/website-form";
+import { getSession } from "@/lib/isAuthenticated";
 
-export default async function Dashboard() {
+export default async function AddWebsite() {
     const isAuthenticated = await getSession();
     if (!isAuthenticated) {
         redirect("/login");
     }
-
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">My Websites</h2>
-                <Link href="/dashboard/new">
-                    <Button>
-                        <Plus />
-                        Website
+                <Link href="/dashboard">
+                    <Button variant="outline">
+                        <ArrowLeft />
+                        Return to Dashboard
                     </Button>
                 </Link>
             </div>
 
-            <WebsitesList />
+            <WebsiteForm />
         </div>
     )
 }

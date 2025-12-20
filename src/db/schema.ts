@@ -59,3 +59,19 @@ export const verification = pgTable("verification", {
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .notNull(),
 });
+
+export const website = pgTable("website", {
+    id: text("id").primaryKey(),
+    websiteId: text("website_id").notNull().unique(),
+    name: text("name").notNull(),
+    url: text("url").notNull(),
+    timezone: text("timezone").notNull(),
+    userId: text("user_id")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+        .defaultNow()
+        .$onUpdate(() => new Date())
+        .notNull(),
+});

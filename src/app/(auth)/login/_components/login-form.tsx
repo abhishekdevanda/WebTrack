@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,13 +19,8 @@ export function LoginForm({
   const [pending, setPending] = useState(false);
 
   const handleGoogleLogin = async () => {
-    try {
-      setPending(true);
-      await signInWithGoogle();
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
-    }
+    setPending(true);
+    await signInWithGoogle();
   };
 
   return (

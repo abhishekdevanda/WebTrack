@@ -16,12 +16,13 @@ export async function signInWithGoogle() {
   if (result.url) {
     redirect(result.url);
   }
-
-  throw new Error("No redirect URL received from Google OAuth");
 }
 
 export async function signOut() {
-  await auth.api.signOut({
+  const result = await auth.api.signOut({
     headers: await headers(),
   });
+  if (result) {
+    redirect("/login");
+  }
 }
