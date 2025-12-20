@@ -1,7 +1,5 @@
 "use server";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/configs/auth-config";
 import { db } from "@/lib/configs/drizzle-config";
 import { website } from "@/db/schema";
 import { websiteSchema } from "../_schemas/website";
@@ -81,10 +79,11 @@ export async function addWebsite(prevState: State, formData: FormData): Promise<
             userId: isAuthenticated.user.id,
         });
     } catch (error) {
+        console.error("Database Insertion Error:", error);
         return {
             message: "Database Error: Failed to Create Website.",
         };
     }
 
-    redirect(`/dashboard/new?websiteId=${websiteId}`);
+    redirect(`/dashboard/new?websiteId=${websiteId}&url=${validatedUrl}`);
 }

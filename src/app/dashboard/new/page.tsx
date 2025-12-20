@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WebsiteForm } from "./_components/website-form";
 import { getSession } from "@/lib/isAuthenticated";
+import { InstallScriptDialog } from "./_components/install-script-dialog";
+import { Suspense } from "react";
 
 export default async function AddWebsite() {
     const isAuthenticated = await getSession();
@@ -22,6 +24,9 @@ export default async function AddWebsite() {
             </div>
 
             <WebsiteForm />
+            <Suspense>
+                <InstallScriptDialog />
+            </Suspense>
         </div>
     )
 }
