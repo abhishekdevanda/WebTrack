@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UAParser } from 'ua-parser-js';
 import { db } from "@/lib/configs/drizzle-config";
-import { PageView, pageView } from "@/db/schema";
+import { pageView, website } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { PageView } from "@/types/types";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const { type, visitorId, websiteId, entryTime, exitTime, totalActiveTime, referrer, url, utmSource, utmMedium, utmCampaign, refParams } = body;
+    const { id, type, visitorId, websiteId, entryTime, exitTime, totalActiveTime, referrer, url, utmSource, utmMedium, utmCampaign, refParams } = body;
 
-    if (!websiteId || !visitorId || !type) {
+    if (!websiteId || !visitorId || !type || !id) {
         return NextResponse.json({ status: "error", message: "Missing required fields" }, { status: 400 });
+    }
+
+    // Validate websiteId
+    const websiteExists = await db.select().from(website).where(eq(website.websiteId, websiteId)).limit(1);
+    if (websiteExists.length === 0) {
+        return NextResponse.json({ status: "error", message: "Invalid websiteId" }, { status: 400 });
     }
 
     // Get device info
@@ -20,14 +27,13 @@ export async function POST(req: NextRequest) {
 
     // Get geo info
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || 'Unknown';
-    const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
-    const geoInfo = await geoRes.json();
+    const geoInfo = await fetch(`http://ip-api.com/json/${ip}`).then(res => res.json()).catch(() => null);
 
     // Insert page view record
     let result: PageView[];
     if (type === "entry") {
         result = await db.insert(pageView).values({
-            id: crypto.randomUUID(),
+            id,
             websiteId,
             visitorId,
             entryTime: new Date(entryTime),
@@ -42,6 +48,7 @@ export async function POST(req: NextRequest) {
             os,
             browser,
             country: geoInfo.country,
+            countryCode: geoInfo.countryCode,
             region: geoInfo.regionName,
             city: geoInfo.city,
             ipAddress: ip,
@@ -52,7 +59,7 @@ export async function POST(req: NextRequest) {
         result = await db.update(pageView).set({
             exitTime: new Date(exitTime),
             totalActiveTime,
-        }).where(eq(pageView.visitorId, visitorId)).returning();
+        }).where(eq(pageView.id, id)).returning();
     }
 
     return NextResponse.json({ message: "Data recorded successfully", data: result });

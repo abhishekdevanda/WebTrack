@@ -1,37 +1,26 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ExternalLink, Settings, TrendingUp, BarChart2 } from "lucide-react";
 import Link from "next/link";
-import { Website } from "@/db/schema";
-import { Area, AreaChart } from "recharts";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { ExternalLink, Settings, TrendingUp, BarChart2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Area, AreaChart, XAxis } from "recharts";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { WebsiteWithAnalytics } from "@/types/types";
 
 interface WebsitesCardProps {
-    website: Website;
+    website: WebsiteWithAnalytics<'timeSeries'>;
 }
 
-// Mock analytics data
-const chartData = [
-    { day: 'Mon', visitors: 120 },
-    { day: 'Tue', visitors: 190 },
-    { day: 'Wed', visitors: 150 },
-    { day: 'Thu', visitors: 220 },
-    { day: 'Fri', visitors: 250 },
-    { day: 'Sat', visitors: 210 },
-    { day: 'Sun', visitors: 180 },
-];
-
 const chartConfig = {
-    visitors: {
+    count: {
         label: "Visitors",
         color: "hsl(var(--chart-1))",
     },
 } satisfies ChartConfig;
 
 export const WebsitesCard = ({ website }: WebsitesCardProps) => {
-    const totalVisitors = chartData.reduce((sum, day) => sum + day.visitors, 0);
+    const totalVisitors = website.analytics.timeSeries.reduce((sum, day) => sum + day.count, 0);
 
     return (
         <Card key={website.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow duration-200">
@@ -65,11 +54,11 @@ export const WebsitesCard = ({ website }: WebsitesCardProps) => {
                 </div>
             </CardHeader>
 
-            <CardContent className="pb-0">
+            <CardContent>
                 <ChartContainer config={chartConfig} className="h-32 w-full">
                     <AreaChart
                         accessibilityLayer
-                        data={chartData}
+                        data={website.analytics.timeSeries}
                         margin={{
                             left: 0,
                             right: 0,
@@ -77,25 +66,35 @@ export const WebsitesCard = ({ website }: WebsitesCardProps) => {
                             bottom: 0,
                         }}
                     >
+                        <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent indicator="line" />}
+                        />
+                        <XAxis
+                            dataKey="label"
+                            tickLine={false}
+                            axisLine={true}
+                            tickMargin={8}
+                            interval={2}
+                            padding={{ left: 16, right: 16 }}
+                        />
                         <Area
-                            dataKey="visitors"
-                            type="natural"
-                            fill="var(--color-primary)"
+                            dataKey="count"
+                            type="monotone"
                             fillOpacity={0.4}
-                            stroke="var(--color-primary)"
                         />
                     </AreaChart>
                 </ChartContainer>
             </CardContent>
 
-            <CardFooter className="flex-col items-start gap-2 pt-4">
+            <CardFooter className="flex-col items-start gap-2">
                 <div className="flex w-full items-start gap-2 text-sm">
                     <div className="grid gap-2">
                         <div className="flex items-center gap-2 leading-none font-medium">
                             {totalVisitors} total visitors <TrendingUp className="h-4 w-4" />
                         </div>
                         <div className="text-muted-foreground flex items-center gap-2 leading-none text-xs">
-                            Last 7 days
+                            Last 24 hours
                         </div>
                     </div>
                 </div>

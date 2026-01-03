@@ -1,0 +1,1 @@
+ALTER TABLE "page_view" ADD COLUMN "country_code" text;

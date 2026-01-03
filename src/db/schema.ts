@@ -1,4 +1,3 @@
-import { InferSelectModel } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -101,11 +100,9 @@ export const pageView = pgTable("page_view", {
     browser: text("browser"),
     city: text("city"),
     country: text("country"),
-    region : text("region"),
+    countryCode: text("country_code"),
+    region: text("region"),
     ipAddress: text("ip_address"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-export type Website = InferSelectModel<typeof website>;
-export type PageView = InferSelectModel<typeof pageView>;
