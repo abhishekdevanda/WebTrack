@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
     return (mounted && <Button
         variant="ghost"
-        size="icon"
+        size="icon-sm"
         onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         aria-label="Toggle theme"
     >

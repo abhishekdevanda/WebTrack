@@ -53,7 +53,7 @@ export const WebsiteForm = () => {
     }, [state.message])
 
     return (
-        <Card className="w-full max-w-2xl mx-auto">
+        <Card className="w-full">
             <CardHeader>
                 <CardTitle className="text-lg">Add Website</CardTitle>
                 <CardDescription>

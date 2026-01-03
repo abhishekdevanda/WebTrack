@@ -13,12 +13,12 @@ export default async function AddWebsite() {
         redirect("/login");
     }
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-2xl mx-auto">
             <div className="flex justify-between items-center">
                 <Link href="/dashboard">
                     <Button variant="outline">
                         <ArrowLeft />
-                        Return to Dashboard
+                        Dashboard
                     </Button>
                 </Link>
             </div>
