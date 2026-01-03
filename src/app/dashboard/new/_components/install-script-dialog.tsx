@@ -21,14 +21,6 @@ export const InstallScriptDialog = () => {
     const [websiteId, setWebsiteId] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
 
-    useEffect(() => {
-        const id = searchParams.get("websiteId");
-        if (id) {
-            setWebsiteId(id);
-            setIsOpen(true);
-        }
-    }, [searchParams]);
-
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
         if (!open) {
@@ -54,6 +46,14 @@ export const InstallScriptDialog = () => {
             toast.error("Failed to copy script");
         }
     };
+
+    useEffect(() => {
+        const id = searchParams.get("websiteId");
+        if (id) {
+            setWebsiteId(id);
+            setIsOpen(true);
+        }
+    }, [searchParams]);
 
     if (!websiteId) return null;
 
