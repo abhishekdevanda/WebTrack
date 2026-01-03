@@ -10,6 +10,7 @@ export const websiteSchema = z.object({
     timezone: z.string().nonempty({
         message: "Please select a timezone.",
     }),
+    websiteId: z.string().optional(), // For updating
 });
 
 export type WebsiteInput = z.infer<typeof websiteSchema>;

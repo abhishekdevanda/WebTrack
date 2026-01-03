@@ -1,4 +1,4 @@
-import { getWebsitesList } from "../_actions/website"
+import { getWebsitesList } from "../_actions/website-analytics"
 import { NoWebsites } from "./no-websites";
 import { WebsitesCard } from "./website-card";
 

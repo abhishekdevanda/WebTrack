@@ -10,7 +10,7 @@ export const NoWebsites = () => {
                 <EmptyMedia variant="icon">
                     <Globe />
                 </EmptyMedia>
-                <EmptyTitle>No websites tracked</EmptyTitle>
+                <EmptyTitle>No websites</EmptyTitle>
                 <EmptyDescription>
                     You haven&apos;t added any websites to track yet.
                     Start by adding your first website.

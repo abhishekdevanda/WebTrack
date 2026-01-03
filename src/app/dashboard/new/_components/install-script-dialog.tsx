@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackingScript } from "@/components/tracking-script";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -9,41 +10,21 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Copy, Terminal } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export const InstallScriptDialog = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [websiteId, setWebsiteId] = useState<string | null>(null);
-    const [copied, setCopied] = useState(false);
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
         if (!open) {
             // Remove params and redirect to dashboard when closed
             router.push("/dashboard");
-        }
-    };
-
-    const scriptCode = `<script
-  defer
-  data-website-id="${websiteId}"
-  src="${process.env.NEXT_PUBLIC_BASE_URL}/analytics.js"
-></script>`;
-
-    const copyToClipboard = async () => {
-        try {
-            // Copy with formatting preserved
-            await navigator.clipboard.writeText(scriptCode);
-            setCopied(true);
-            toast.success("Script copied to clipboard!");
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            toast.error("Failed to copy script");
         }
     };
 
@@ -72,34 +53,7 @@ export const InstallScriptDialog = () => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="my-4 relative group">
-                    <div className="absolute -top-4 left-4 bg-background px-2 text-xs font-medium text-muted-foreground z-10">
-                        HTML
-                    </div>
-                    <div className="relative rounded-lg border bg-muted/50 p-4 font-mono text-sm text-foreground shadow-sm transition-colors hover:bg-muted/70">
-                        <pre className="m-0 overflow-x-auto whitespace-pre-wrap break-word">
-                            {scriptCode}
-                        </pre>
-                    </div>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        className="absolute right-2 top-2 h-8 gap-1 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={copyToClipboard}
-                    >
-                        {copied ? (
-                            <>
-                                <Check className="h-3.5 w-3.5 text-green-500" />
-                                <span className="text-xs">Copied</span>
-                            </>
-                        ) : (
-                            <>
-                                <Copy className="h-3.5 w-3.5" />
-                                <span className="text-xs">Copy</span>
-                            </>
-                        )}
-                    </Button>
-                </div>
+                <TrackingScript websiteId={websiteId} />
 
                 <DialogFooter className="sm:justify-end gap-2 items-center">
                     <Button

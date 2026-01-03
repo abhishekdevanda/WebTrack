@@ -46,7 +46,7 @@ export const WebsitesCard = ({ website }: WebsitesCardProps) => {
                         asChild
                         className="shrink-0 h-8 w-8"
                     >
-                        <Link href={`/dashboard/${website.id}/settings`}>
+                        <Link href={`/dashboard/${website.id}`}>
                             <Settings className="h-4 w-4" />
                             <span className="sr-only">Settings</span>
                         </Link>
@@ -99,7 +99,7 @@ export const WebsitesCard = ({ website }: WebsitesCardProps) => {
                     </div>
                 </div>
                 <Button className="w-full mt-2" asChild variant="outline" size="sm">
-                    <Link href={`/dashboard/${website.id}`}>
+                    <Link href={`/dashboard/${website.id}/analytics`}>
                         <BarChart2 className="mr-2 h-4 w-4" />
                         View Full Analytics
                     </Link>

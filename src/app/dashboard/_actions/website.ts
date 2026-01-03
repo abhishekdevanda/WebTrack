@@ -1,14 +1,133 @@
 "use server";
-
-import { pageView, website } from "@/db/schema";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/configs/drizzle-config";
+import { website } from "@/db/schema";
+import { websiteSchema } from "../_schemas/website";
+import { eq, and } from "drizzle-orm";
+import z from "zod";
 import { getSession } from "@/lib/isAuthenticated";
-import { eq, sql, and, gte, inArray } from "drizzle-orm";
-import { TimeSeriesDataPoint } from "@/types/types";
+import { revalidatePath } from "next/cache";
 
-export async function getWebsitesList() {
+export type State = {
+    errors?: {
+        name?: string[];
+        url?: string[];
+        timezone?: string[];
+        websiteId?: string[];
+    };
+    message?: string | null;
+};
+
+export async function getWebsite(websiteId: string) {
+    const isAuthenticated = await getSession();
+    if (!isAuthenticated) {
+        redirect("/login");
+    }
+
+    try {
+        const sites = await db
+            .select()
+            .from(website)
+            .where(
+                and(
+                    eq(website.id, websiteId),
+                    eq(website.userId, isAuthenticated.user.id)
+                )
+            )
+            .limit(1);
+
+        const site = sites[0];
+
+        if (!site) {
+            return {
+                error: "Website not found",
+            };
+        }
+
+        return {
+            website: site,
+        };
+    } catch (error) {
+        console.error("Error Fetching Website:", error);
+        return {
+            error: "Failed to fetch website details",
+        };
+    }
+}
+
+export async function addWebsite(prevState: State, formData: FormData): Promise<State> {
 
     // Authenticate User
+    const isAuthenticated = await getSession();
+
+    if (!isAuthenticated) {
+        return {
+            message: "Unauthorized",
+        };
+    }
+
+    // Validate Input
+    let url = formData.get("url") as string;
+    if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+        url = `https://${url}`;
+    }
+
+    const validatedFields = websiteSchema.safeParse({
+        name: formData.get("name"),
+        url,
+        timezone: formData.get("timezone"),
+    });
+
+    if (!validatedFields.success) {
+        const flattened = z.flattenError(validatedFields.error);
+        return {
+            errors: flattened.fieldErrors,
+            message: "Missing Fields. Failed to Create Website.",
+        };
+    }
+
+    const { name, timezone } = validatedFields.data;
+    // url is already extracted and modified above, but we should use the validated one to be safe
+    const validatedUrl = validatedFields.data.url;
+
+    // Check for existing website with same URL for this user
+    const existingWebsite = await db
+        .select()
+        .from(website)
+        .where(and(eq(website.url, validatedUrl), eq(website.userId, isAuthenticated.user.id)))
+        .then((res) => res[0]);
+
+    if (existingWebsite) {
+        return {
+            errors: {
+                url: ["Website already exists."],
+            },
+            message: "Website already exists.",
+        };
+    }
+
+    const websiteId = crypto.randomUUID();
+
+    try {
+        await db.insert(website).values({
+            id: crypto.randomUUID(),
+            websiteId,
+            name,
+            url: validatedUrl,
+            timezone,
+            userId: isAuthenticated.user.id,
+        });
+    } catch (error) {
+        console.error("Database Insertion Error:", error);
+        return {
+            message: "Database Error: Failed to Create Website.",
+        };
+    }
+
+    redirect(`/dashboard/new?websiteId=${websiteId}`);
+}
+
+export async function updateWebsite(prevState: State, formData: FormData): Promise<State> {
     const isAuthenticated = await getSession();
     if (!isAuthenticated) {
         return {
@@ -16,86 +135,97 @@ export async function getWebsitesList() {
         };
     }
 
-    // User Websites
-    try {
-        const websites = await db
-            .select()
-            .from(website)
-            .where(eq(website.userId, isAuthenticated.user.id));
+    // Validate Input
+    let url = formData.get("url") as string;
+    if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+        url = `https://${url}`;
+    }
 
-        if (websites.length === 0) {
+    const validatedFields = websiteSchema.safeParse({
+        websiteId: formData.get("websiteId"),
+        name: formData.get("name"),
+        url,
+        timezone: formData.get("timezone"),
+    });
+
+    if (!validatedFields.success) {
+        const flattened = z.flattenError(validatedFields.error);
+        return {
+            errors: flattened.fieldErrors,
+            message: "Failed to Update Website.",
+        };
+    }
+
+    const { name, timezone, websiteId } = validatedFields.data;
+    const validatedUrl = validatedFields.data.url;
+
+    if (!websiteId) {
+        return {
+            message: "Website ID is missing.",
+        };
+    }
+
+    try {
+        const updated = await db
+            .update(website)
+            .set({
+                name,
+                url: validatedUrl,
+                timezone,
+                updatedAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(website.websiteId, websiteId),
+                    eq(website.userId, isAuthenticated.user.id)
+                )
+            )
+            .returning();
+
+        if (updated.length === 0) {
             return {
-                websites: [],
+                message: "Website not found.",
             };
         }
 
-        const websiteIds = websites.map((w) => w.websiteId);
-        const analyticsData = await fetchLast24HourVisitorCounts(websiteIds);
-
-        const websitesWithAnalytics = websites.map((site) => {
-            const siteAnalytics = analyticsData.filter((a) => a.websiteId === site.websiteId);
-
-            const chartData: TimeSeriesDataPoint[] = [];
-            for (let i = 23; i >= 0; i--) {
-                const d = new Date();
-                d.setHours(d.getHours() - i);
-                d.setMinutes(0, 0, 0);
-
-                // Use UTC for matching with DB
-                const year = d.getUTCFullYear();
-                const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-                const day = String(d.getUTCDate()).padStart(2, '0');
-                const hour = String(d.getUTCHours()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day} ${hour}:00`;
-
-                // Use Local time for display label
-                const hourLabel = d.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-
-                const found = siteAnalytics.find((a) => a.date === dateStr);
-                chartData.push({
-                    label: hourLabel,
-                    count: found ? found.visitors : 0,
-                    date: dateStr,
-                });
-            }
-
-            return {
-                ...site,
-                analytics: {
-                    timeSeries: chartData
-                },
-            };
-        });
-
+        revalidatePath("/dashboard");
+        revalidatePath(`/dashboard/${websiteId}`);
         return {
-            websites: websitesWithAnalytics,
+            message: "Website updated successfully",
         };
-
     } catch (error) {
-        console.error("Error Fetching Websites:", error);
+        console.error("Error Updating Website:", error);
         return {
-            message: "Failed to Fetch Websites.",
+            message: "Failed to update website",
         };
     }
 }
 
-async function fetchLast24HourVisitorCounts(websiteIds: string[]) {
-    const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+export async function deleteWebsite(websiteId: string) {
+    const isAuthenticated = await getSession();
+    if (!isAuthenticated) {
+        return {
+            error: "Unauthorized",
+        };
+    }
 
-    return await db
-        .select({
-            websiteId: pageView.websiteId,
-            date: sql<string>`to_char(${pageView.entryTime}, 'YYYY-MM-DD HH24:00')`,
-            visitors: sql<number>`count(DISTINCT ${pageView.visitorId})`.mapWith(Number)
-        })
-        .from(pageView)
-        .where(
-            and(
-                inArray(pageView.websiteId, websiteIds),
-                gte(pageView.entryTime, twentyFourHoursAgo)
-            )
-        )
-        .groupBy(pageView.websiteId, sql`to_char(${pageView.entryTime}, 'YYYY-MM-DD HH24:00')`)
-        .orderBy(sql`to_char(${pageView.entryTime}, 'YYYY-MM-DD HH24:00')`);
+    try {
+        await db
+            .delete(website)
+            .where(
+                and(
+                    eq(website.id, websiteId),
+                    eq(website.userId, isAuthenticated.user.id)
+                )
+            );
+
+        revalidatePath("/dashboard");
+    } catch (error) {
+        console.error("Error Deleting Website:", error);
+        return {
+            error: "Failed to delete website",
+        };
+    }
+
+    redirect("/dashboard");
 }

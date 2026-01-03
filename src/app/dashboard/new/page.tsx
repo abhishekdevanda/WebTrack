@@ -14,13 +14,19 @@ export default async function AddWebsite() {
     }
     return (
         <div className="space-y-4 max-w-2xl mx-auto">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col justify-start items-start sm:flex-row sm:items-center gap-4">
                 <Link href="/dashboard">
                     <Button variant="outline">
                         <ArrowLeft />
                         Dashboard
                     </Button>
                 </Link>
+                <div>
+                    <h3 className="text-2xl font-semibold tracking-tight">Add Website</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Add a new website to track its analytics.
+                    </p>
+                </div>
             </div>
 
             <WebsiteForm />

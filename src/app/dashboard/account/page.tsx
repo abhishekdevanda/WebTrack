@@ -18,20 +18,20 @@ export default async function AccountPage() {
     const linkedAccounts = await getLinkedAccounts();
 
     return (
-        <div className="space-y-4 max-w-2xl mx-auto">
-            <div className="flex justify-between items-center">
+        <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="flex flex-col justify-start items-start sm:flex-row sm:items-center gap-4">
                 <Link href="/dashboard">
                     <Button variant="outline">
                         <ArrowLeft />
                         Dashboard
                     </Button>
                 </Link>
-            </div>
-            <div>
-                <h3 className="text-2xl font-semibold tracking-tight">Account Settings</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                    Manage your profile, connected accounts, and security preferences.
-                </p>
+                <div>
+                    <h3 className="text-2xl font-semibold tracking-tight">Account Settings</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Manage your profile, connected accounts, and security preferences.
+                    </p>
+                </div>
             </div>
 
             <Separator className="my-6" />

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { AppWindow, Globe, MapPin } from "lucide-react"
-import { useActionState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AppWindow, Globe, MapPin, Loader2 } from "lucide-react";
+import { useActionState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Form,
     FormControl,
@@ -16,8 +16,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+} from "@/components/ui/form";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
     Select,
     SelectContent,
@@ -26,43 +26,55 @@ import {
     SelectLabel,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-import { WebsiteInput, websiteSchema } from "../../_schemas/website"
-import { addWebsite } from "../../_actions/website"
+} from "@/components/ui/select";
+import { updateWebsite } from "@/app/dashboard/_actions/website";
+import { WebsiteInput, websiteSchema } from "@/app/dashboard/_schemas/website";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Website } from "@/types/types";
 
-export const WebsiteForm = () => {
-    const [state, formAction, isPending] = useActionState(addWebsite, {
+interface EditWebsiteCardProps {
+    website: Website;
+}
+
+export function EditWebsiteForm({ website }: EditWebsiteCardProps) {
+    const [state, formAction, isPending] = useActionState(updateWebsite, {
         message: null,
         errors: {},
-    })
+    });
 
     const form = useForm<WebsiteInput>({
         resolver: zodResolver(websiteSchema),
         defaultValues: {
-            name: "",
-            url: "",
-            timezone: "",
+            websiteId: website.websiteId,
+            name: website.name,
+            url: website.url.replace(/^https?:\/\//, ''),
+            timezone: website.timezone,
         },
     })
 
     useEffect(() => {
         if (state.message) {
-            toast.error(state.message)
+            if (state.message.includes("success")) {
+                toast.success(state.message);
+            } else if (state.message !== "Unauthorized") {
+                toast.error(state.message);
+            }
         }
-        state.message = null
     }, [state.message])
 
     return (
-        <Card className="w-full">
+        <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Add Website</CardTitle>
+                <CardTitle>Website Settings</CardTitle>
                 <CardDescription>
-                    Enter your website details to start tracking analytics.
+                    Update your website details.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form action={formAction} className="space-y-6">
+                        <input type="hidden" name="websiteId" value={website.websiteId} />
                         <FormField
                             control={form.control}
                             name="name"
@@ -192,14 +204,28 @@ export const WebsiteForm = () => {
                                 </FormItem>
                             )}
                         />
-                        <div className="flex justify-end">
-                            <Button type="submit" size="lg" disabled={isPending}>
-                                {isPending ? "Adding..." : "Add Website"}
+
+                        <div className="grid gap-2">
+                            <Label>Website ID</Label>
+                            <Input
+                                value={website.websiteId}
+                                disabled
+                                className="bg-muted font-mono"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                This ID is used in your tracking script and cannot be changed.
+                            </p>
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t">
+                            <Button type="submit" disabled={isPending}>
+                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
                             </Button>
                         </div>
                     </form>
                 </Form>
             </CardContent>
         </Card>
-    )
+    );
 }
